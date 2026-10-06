@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Brew &amp; Co. Back Office{% endblock %}</title>
+</head>
+
+<body>
+    <header>
+        <h1>Brew &amp; Co. Back Office</h1>
+        <p>Today: {{ today_label }}</p>
+
+        <nav aria-label="Main navigation">
+            <a id="nav-home" href="/" data-risk="none" data-action="navigate_home">Home</a>
+            <a id="nav-inventory" href="/inventory" data-risk="none" data-action="navigate_inventory">Inventory</a>
+            <a id="nav-suppliers" href="/suppliers" data-risk="none" data-action="navigate_suppliers">Suppliers</a>
+            <a id="nav-orders" href="/orders" data-risk="none" data-action="navigate_orders">Orders</a>
+            <a id="nav-menu" href="/menu" data-risk="none" data-action="navigate_menu">Menu</a>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+
+</html>

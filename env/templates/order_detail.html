@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Order {{ order["id"] }} | Brew &amp; Co.{% endblock %}
+
+{% block content %}
+    <h2>Purchase order {{ order["id"] }}</h2>
+
+    <dl>
+        <dt>Supplier</dt>
+        <dd>{{ order["supplier_name"] }}</dd>
+
+        <dt>Status</dt>
+        <dd>{{ order["status"] }}</dd>
+
+        <dt>Delivery date</dt>
+        <dd>{{ order["delivery_date"] or "—" }}</dd>
+
+        <dt>Total</dt>
+        <dd>₹{{ order["total"] }}</dd>
+
+        <dt>Notes</dt>
+        <dd>{{ order["notes"] or "—" }}</dd>
+    </dl>
+
+    <h3>Order lines</h3>
+
+    {% if lines %}
+        <table id="order-lines-table" border="1">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Cases</th>
+                    <th>Price per case</th>
+                    <th>Line total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in lines %}
+                    <tr id="order-line-{{ loop.index }}">
+                        <td>{{ line["item_name"] }}</td>
+                        <td>{{ line["qty_units"] }}</td>
+                        <td>{{ line["cases"] }}</td>
+                        <td>₹{{ line["unit_price_per_case"] }}</td>
+                        <td>₹{{ line["line_total"] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p id="empty-order-lines">This order has no lines.</p>
+    {% endif %}
+{% endblock %}

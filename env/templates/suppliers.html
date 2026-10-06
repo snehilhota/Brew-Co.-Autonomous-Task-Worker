@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Suppliers | Brew &amp; Co.{% endblock %}
+
+{% block content %}
+    <h2>Suppliers</h2>
+
+    <table id="suppliers-table" border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Hold reason</th>
+                <th>Lead time (days)</th>
+                <th>Minimum order value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supplier in suppliers %}
+                <tr id="supplier-row-{{ supplier['id'] }}">
+                    <td>{{ supplier["name"] }}</td>
+                    <td>{{ supplier["status"] }}</td>
+                    <td>{{ supplier["hold_reason"] or "—" }}</td>
+                    <td>{{ supplier["lead_time_days"] }}</td>
+                    <td>₹{{ supplier["min_order_value"] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory | Brew &amp; Co.{% endblock %}
+
+{% block content %}
+<h2>Inventory</h2>
+
+<table id="inventory-table" border="1">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Unit</th>
+            <th>On hand</th>
+            <th>Reorder point</th>
+            <th>Par level</th>
+            <th>Expiry</th>
+            <th>Default supplier</th>
+            <th>Flag</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr id="inventory-row-{{ item['id'] }}">
+            <td>{{ item["name"] }}</td>
+            <td>{{ item["unit"] }}</td>
+            <td>{{ item["on_hand"] }}</td>
+            <td>{{ item["reorder_point"] }}</td>
+            <td>{{ item["par_level"] }}</td>
+            <td>{{ item["expiry_date"] or "—" }}</td>
+            <td>{{ item["default_supplier"] or "—" }}</td>
+            <td>
+                {% if item["flagged"] %}
+                <p>Flagged: {{ item["flag_note"] }}</p>
+                {% else %}
+                <p>Not flagged</p>
+                {% endif %}
+
+                <form method="post" action="{{ url_for('toggle_flag', item_id=item['id']) }}" data-risk="reversible"
+                    data-action="toggle_flag">
+                    <label for="flag-note-{{ item['id'] }}">Flag note</label>
+                    <input id="flag-note-{{ item['id'] }}" name="flag_note" type="text"
+                        value="{{ item['flag_note'] or '' }}">
+
+                    {% if item["flagged"] %}
+                    <button id="unflag-{{ item['id'] }}" name="flagged" value="0" data-risk="reversible"
+                        data-action="toggle_flag">Unflag</button>
+                    {% else %}
+                    <button id="flag-{{ item['id'] }}" name="flagged" value="1" data-risk="reversible"
+                        data-action="toggle_flag">Flag</button>
+                    {% endif %}
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Orders | Brew &amp; Co.{% endblock %}
+
+{% block content %}
+<h2>Purchase orders</h2>
+
+<p>
+    <a id="new-purchase-order" href="/orders/new" data-risk="none" data-action="navigate_new_order">Create purchase
+        order</a>
+</p>
+
+{% if orders %}
+<table id="orders-table" border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Supplier</th>
+            <th>Status</th>
+            <th>Delivery</th>
+            <th>Total</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders %}
+        <tr id="order-row-{{ order['id'] }}">
+            <td>
+                <a id="view-order-{{ order['id'] }}" href="/orders/{{ order['id'] }}" data-risk="none"
+                    data-action="view_order">{{ order["id"] }}</a>
+            </td>
+            <td>{{ order["supplier_name"] }}</td>
+            <td>{{ order["status"] }}</td>
+            <td>{{ order["delivery_date"] or "—" }}</td>
+            <td>₹{{ order["total"] }}</td>
+            <td>{{ order["created_at"] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p id="empty-orders">No purchase orders yet.</p>
+{% endif %}
+{% endblock %}

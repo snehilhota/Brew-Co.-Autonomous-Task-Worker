@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}New Purchase Order | Brew &amp; Co.{% endblock %}
+
+{% block content %}
+<h2>New purchase order</h2>
+<p>Order saving and validation will be added in the next milestone.</p>
+
+<form id="purchase-order-form">
+    <label for="supplier-id">Supplier</label>
+    <select id="supplier-id" name="supplier_id">
+        <option value="">Select a supplier</option>
+        {% for supplier in suppliers %}
+        <option value="{{ supplier['id'] }}">
+            {{ supplier["name"] }} ({{ supplier["status"] }})
+            {% if supplier["hold_reason"] %}
+            — {{ supplier["hold_reason"] }}
+            {% endif %}
+        </option>
+        {% endfor %}
+    </select>
+
+    <p>
+        <label for="delivery-date">Delivery date (DD/MM/YYYY)</label>
+        <input id="delivery-date" name="delivery_date" type="text" placeholder="DD/MM/YYYY">
+    </p>
+
+    <div id="order-lines">
+        <h3>Order lines</h3>
+
+        <div id="order-line-1">
+            <label for="item-1">Item</label>
+            <select id="item-1" name="item_id">
+                <option value="">Select an item</option>
+                {% for item in inventory_items %}
+                <option value="{{ item['id'] }}">
+                    {{ item["name"] }} ({{ item["unit"] }})
+                </option>
+                {% endfor %}
+            </select>
+
+            <label for="quantity-1">Quantity in base units</label>
+            <input id="quantity-1" name="quantity" type="number" min="1" step="1">
+            <p id="line-total-1">Line total: calculated in the next milestone.</p>
+        </div>
+    </div>
+
+    <button id="add-line" type="button" data-risk="reversible" data-action="add_po_line" disabled>Add line</button>
+
+    <p>
+        <label for="notes">Notes (optional)</label>
+        <textarea id="notes" name="notes"></textarea>
+    </p>
+
+    <p id="order-total">Order total: calculated in the next milestone.</p>
+
+    <button id="save-draft" type="button" data-risk="reversible" data-action="save_draft" disabled>Save draft</button>
+
+    <button id="submit-order" type="button" data-risk="irreversible" data-action="submit_po" disabled>Submit
+        order</button>
+</form>
+{% endblock %}

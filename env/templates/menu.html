@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Menu | Brew &amp; Co.{% endblock %}
+
+{% block content %}
+<h2>Menu</h2>
+
+<table id="menu-table" border="1">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Price</th>
+            <th>Availability</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in menu_items %}
+        <tr id="menu-row-{{ item['id'] }}">
+            <td>{{ item["name"] }}</td>
+            <td>₹{{ item["price"] }}</td>
+            <td>
+                {% if item["available"] %}
+                Available
+                {% else %}
+                Unavailable
+                {% endif %}
+            </td>
+            <td>
+                <form method="post" action="{{ url_for('toggle_menu_availability', menu_item_id=item['id']) }}"
+                    data-risk="reversible" data-action="toggle_menu_availability">
+                    {% if item["available"] %}
+                    <button id="menu-toggle-{{ item['id'] }}" data-risk="reversible"
+                        data-action="toggle_menu_availability">Mark unavailable</button>
+                    {% else %}
+                    <button id="menu-toggle-{{ item['id'] }}" data-risk="reversible"
+                        data-action="toggle_menu_availability">Mark available</button>
+                    {% endif %}
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
