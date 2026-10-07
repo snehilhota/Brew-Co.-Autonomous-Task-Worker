@@ -5,6 +5,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from flask import Flask, Response, abort, redirect, render_template, request, url_for
+from datetime import date, datetime
+from validation import is_positive_whole_quantity, validate_purchase_order
 
 
 ENV_DIR = Path(__file__).resolve().parent
@@ -239,20 +241,32 @@ def toggle_menu_availability(menu_item_id: int) -> Response:
     return redirect(url_for("menu"))
 
 @app.get("/orders/new")
-def new_order() -> str:
+def render_order_form(
+    errors: list[str] | None = None,
+    selected_supplier_id: str = "",
+    delivery_date_text: str = "",
+    notes: str = "",
+    item_ids: list[str] | None = None,
+    quantities: list[str] | None = None,
+    visible_line_count: int = 1,
+    order_total: int = 0,
+) -> str:
     connection = get_db_connection()
     supplier_rows = connection.execute(
         """
-        SELECT id, name, status, hold_reason
+        SELECT id, name, status, hold_reason, lead_time_days, min_order_value
         FROM suppliers
         ORDER BY id
         """
     ).fetchall()
     inventory_rows = connection.execute(
+        "SELECT id, name, unit FROM inventory_items ORDER BY id"
+    ).fetchall()
+    offer_rows = connection.execute(
         """
-        SELECT id, name, unit
-        FROM inventory_items
-        ORDER BY id
+        SELECT supplier_id, item_id, case_size, price_per_case, available
+        FROM supplier_items
+        ORDER BY supplier_id, item_id
         """
     ).fetchall()
     connection.close()
@@ -261,8 +275,200 @@ def new_order() -> str:
         "order_new.html",
         suppliers=supplier_rows,
         inventory_items=inventory_rows,
+        supplier_offers=[dict(row) for row in offer_rows],
         today_label=get_today_label(),
+        errors=errors or [],
+        selected_supplier_id=selected_supplier_id,
+        delivery_date_text=delivery_date_text,
+        notes=notes,
+        item_ids=item_ids or [],
+        quantities=quantities or [],
+        visible_line_count=visible_line_count,
+        order_total=order_total,
     )
+
+
+@app.route("/orders/new", methods=["GET", "POST"])
+def new_order() -> str | Response:
+    if request.method == "GET":
+        return render_order_form()
+
+    action = request.form.get("action", "")
+    selected_supplier_id = request.form.get("supplier_id", "")
+    delivery_date_text = request.form.get("delivery_date", "").strip()
+    notes = request.form.get("notes", "").strip()
+    item_ids = request.form.getlist("item_id")
+    quantities = request.form.getlist("quantity")
+
+    visible_line_count = max(
+        (
+            index + 1
+            for index, (item_id, quantity) in enumerate(zip(item_ids, quantities))
+            if item_id or quantity
+        ),
+        default=1,
+    )
+
+    errors = []
+    if action not in {"draft", "submit"}:
+        errors.append("Choose Save draft or Submit order.")
+
+    try:
+        supplier_id = int(selected_supplier_id)
+    except ValueError:
+        supplier_id = None
+        errors.append("Select a supplier.")
+
+    connection = get_db_connection()
+    supplier_row = None
+    if supplier_id is not None:
+        supplier_row = connection.execute(
+            "SELECT * FROM suppliers WHERE id = ?",
+            (supplier_id,),
+        ).fetchone()
+        if supplier_row is None:
+            errors.append("Select a valid supplier.")
+
+    lines = []
+    for item_text, quantity_text in zip(item_ids, quantities):
+        if not item_text and not quantity_text:
+            continue
+
+        if not item_text:
+            errors.append("Select an item for each order line with a quantity.")
+            continue
+
+        try:
+            item_id = int(item_text)
+        except ValueError:
+            errors.append("Select a valid inventory item.")
+            continue
+
+        item = connection.execute(
+            "SELECT id, name, unit FROM inventory_items WHERE id = ?",
+            (item_id,),
+        ).fetchone()
+        if item is None:
+            errors.append("Select a valid inventory item.")
+            continue
+
+        offer = None
+        if supplier_id is not None:
+            offer = connection.execute(
+                """
+                SELECT case_size, price_per_case, available
+                FROM supplier_items
+                WHERE supplier_id = ? AND item_id = ?
+                """,
+                (supplier_id, item_id),
+            ).fetchone()
+
+        lines.append(
+            {
+                "item_id": item_id,
+                "item_name": item["name"],
+                "unit": item["unit"],
+                "quantity": quantity_text,
+                "case_size": offer["case_size"] if offer else None,
+                "price_per_case": offer["price_per_case"] if offer else 0,
+                "available": offer["available"] if offer else None,
+            }
+        )
+
+    connection.close()
+
+    order_total = 0
+    for line in lines:
+        case_size = line["case_size"]
+        quantity = line["quantity"]
+
+        if case_size and is_positive_whole_quantity(quantity):
+            quantity_number = int(quantity)
+            cases = (quantity_number + case_size - 1) // case_size
+            order_total += cases * line["price_per_case"]
+
+    if supplier_row is not None:
+        errors.extend(
+            validate_purchase_order(
+                delivery_date_text=delivery_date_text,
+                today=APP_TODAY,
+                supplier=dict(supplier_row),
+                lines=lines,
+                order_total=order_total,
+                submit=(action == "submit"),
+            )
+        )
+
+    if errors:
+        return render_order_form(
+            errors=errors,
+            selected_supplier_id=selected_supplier_id,
+            delivery_date_text=delivery_date_text,
+            notes=notes,
+            item_ids=item_ids,
+            quantities=quantities,
+            visible_line_count=visible_line_count,
+            order_total=order_total,
+        )
+
+    delivery_date_iso = datetime.strptime(
+        delivery_date_text,
+        "%d/%m/%Y",
+    ).date().isoformat()
+
+    created_at = datetime.now().isoformat(timespec="seconds")
+    is_submit = action == "submit"
+
+    connection = get_db_connection()
+    cursor = connection.execute(
+        """
+        INSERT INTO purchase_orders
+            (supplier_id, status, delivery_date, total, notes, created_at, submitted_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            supplier_id,
+            "submitted" if is_submit else "draft",
+            delivery_date_iso,
+            order_total,
+            notes or None,
+            created_at,
+            created_at if is_submit else None,
+        ),
+    )
+    order_id = cursor.lastrowid
+
+    for line in lines:
+        quantity = int(line["quantity"])
+        case_size = line["case_size"] or 0
+        cases = (
+            (quantity + case_size - 1) // case_size
+            if case_size
+            else 0
+        )
+        price_per_case = line["price_per_case"]
+        line_total = cases * price_per_case
+
+        connection.execute(
+            """
+            INSERT INTO purchase_order_lines
+                (po_id, item_id, qty_units, cases, unit_price_per_case, line_total)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                order_id,
+                line["item_id"],
+                quantity,
+                cases,
+                price_per_case,
+                line_total,
+            ),
+        )
+
+    connection.commit()
+    connection.close()
+
+    return redirect(url_for("order_detail", order_id=order_id))
 
 
 if __name__ == "__main__":
