@@ -5,11 +5,13 @@
 {% block content %}
 <h2>Menu</h2>
 
-<table id="menu-table" border="1">
+<div class="table-scroll">
+<table id="menu-table">
     <thead>
         <tr>
             <th>Item</th>
             <th>Price</th>
+            <th>Ingredients per serving and current stock</th>
             <th>Availability</th>
             <th>Action</th>
         </tr>
@@ -19,6 +21,7 @@
         <tr id="menu-row-{{ item['id'] }}">
             <td>{{ item["name"] }}</td>
             <td>₹{{ item["price"] }}</td>
+            <td>{{ item["ingredient_details"] }}</td>
             <td>
                 {% if item["available"] %}
                 Available
@@ -42,4 +45,5 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% endblock %}

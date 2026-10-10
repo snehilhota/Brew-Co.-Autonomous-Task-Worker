@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Agent Run | Brew &amp; Co.{% endblock %}
+
+{% block content %}
+<p class="back-link"><a href="{{ url_for('agent_activity') }}">← Back to agent activity</a></p>
+<section class="run-detail-header">
+    <div>
+        <p class="eyebrow">TASK RUN · {{ run["run_id"] }}</p>
+        <h1>{{ run["goal"] }}</h1>
+        <p class="run-detail-meta">{{ run["scenario_id"] or "Manual task" }} · {{ run["started_at"]|replace("T", " ")|replace("+00:00", " UTC") }}</p>
+    </div>
+    <span class="run-status status-{{ run['status']|lower }}">{{ run["status"]|replace("_", " ")|title }}</span>
+</section>
+
+<section class="run-outcome-card">
+    <div class="outcome-symbol {% if run['verification_ok'] %}outcome-good{% else %}outcome-pending{% endif %}">{% if run["verification_ok"] %}✓{% else %}·{% endif %}</div>
+    <div><p class="card-label">RUN OUTCOME</p><strong>{{ run["summary"] }}</strong><p>{% if run["verification_ok"] %}The verifier confirmed the final claims.{% else %}The run did not receive a successful independent verification.{% endif %}</p></div>
+</section>
+
+<section class="run-metrics run-detail-metrics">
+    <span><strong>{{ run["steps"] }}</strong> model steps</span>
+    <span><strong>{{ run["tool_calls"] }}</strong> tool actions</span>
+    {% if run["api_requests"] is not none %}<span><strong>{{ run["api_requests"] }}</strong> API requests</span>{% endif %}
+    <span><strong>{{ run["wall_seconds"] }}</strong> seconds</span>
+</section>
+
+<section class="run-timeline-section">
+    <div class="runs-heading"><div><p class="eyebrow">OBSERVE · ACT · CHECK</p><h2>Tool activity</h2></div></div>
+    {% if actions %}
+        <ol class="run-timeline">
+            {% for action in actions %}
+                <li class="timeline-item">
+                    <span class="timeline-marker {% if action['ok'] %}timeline-done{% elif action['ok'] == false %}timeline-error{% endif %}">{% if action["ok"] %}✓{% elif action["ok"] == false %}!{% else %}{{ loop.index }}{% endif %}</span>
+                    <div><span class="timeline-step">STEP {{ action["step"] or "—" }}</span><strong>{{ action["tool"]|replace("_", " ")|title }}</strong><small>{% if action["ok"] %}Completed{% elif action["ok"] == false %}Needs attention{% else %}Result not recorded{% endif %}</small></div>
+                </li>
+            {% endfor %}
+        </ol>
+    {% else %}
+        <p class="empty-timeline">This run ended before recording any tool actions.</p>
+    {% endif %}
+</section>
+{% endblock %}

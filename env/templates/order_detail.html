@@ -5,6 +5,16 @@
 {% block content %}
     <h2>Purchase order {{ order["id"] }}</h2>
 
+    {% if order["status"] == "draft" %}
+        <div class="order-actions" aria-label="Draft actions">
+            <a class="button button-primary" id="edit-draft" href="{{ url_for('new_order', draft_id=order['id']) }}" data-risk="none" data-action="edit_draft">Edit draft / submit</a>
+            <form method="post" action="{{ url_for('delete_draft', order_id=order['id']) }}">
+                <button class="button button-danger" id="delete-draft" type="submit" data-risk="irreversible" data-action="delete_draft">Delete draft</button>
+            </form>
+            <p class="draft-note">Submitting rechecks supplier availability, delivery timing, and order requirements.</p>
+        </div>
+    {% endif %}
+
     <dl>
         <dt>Supplier</dt>
         <dd>{{ order["supplier_name"] }}</dd>
@@ -25,7 +35,8 @@
     <h3>Order lines</h3>
 
     {% if lines %}
-        <table id="order-lines-table" border="1">
+        <div class="table-scroll">
+        <table id="order-lines-table">
             <thead>
                 <tr>
                     <th>Item</th>
@@ -47,6 +58,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        </div>
     {% else %}
         <p id="empty-order-lines">This order has no lines.</p>
     {% endif %}

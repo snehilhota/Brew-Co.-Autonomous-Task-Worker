@@ -6,12 +6,12 @@
 <h2>Purchase orders</h2>
 
 <p>
-    <a id="new-purchase-order" href="/orders/new" data-risk="none" data-action="navigate_new_order">Create purchase
-        order</a>
+    <a class="button button-primary" id="new-purchase-order" href="/orders/new" data-risk="none" data-action="navigate_new_order">Create purchase order <span aria-hidden="true">→</span></a>
 </p>
 
 {% if orders %}
-<table id="orders-table" border="1">
+<div class="table-scroll">
+<table id="orders-table">
     <thead>
         <tr>
             <th>ID</th>
@@ -20,6 +20,7 @@
             <th>Delivery</th>
             <th>Total</th>
             <th>Created</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -34,10 +35,23 @@
             <td>{{ order["delivery_date"] or "—" }}</td>
             <td>₹{{ order["total"] }}</td>
             <td>{{ order["created_at"] }}</td>
+            <td>
+                {% if order["status"] == "draft" %}
+                    <div class="row-actions">
+                        <a class="button button-primary button-small" id="edit-draft-{{ order['id'] }}" href="{{ url_for('new_order', draft_id=order['id']) }}" data-risk="none" data-action="edit_draft">Edit draft</a>
+                        <form method="post" action="{{ url_for('delete_draft', order_id=order['id']) }}">
+                            <button class="button button-danger button-small" id="delete-draft-{{ order['id'] }}" type="submit" data-risk="irreversible" data-action="delete_draft">Delete</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <span class="muted-cell">—</span>
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% else %}
 <p id="empty-orders">No purchase orders yet.</p>
 {% endif %}

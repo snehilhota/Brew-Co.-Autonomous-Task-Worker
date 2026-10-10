@@ -1,0 +1,11 @@
+{
+  "id": "S2_menu_unavailable",
+  "task": "Mark every menu item we can't make right now as unavailable.",
+  "env": {"APP_TODAY": "2026-10-05", "chaos": {}, "extra_files": []},
+  "assertions": [
+    {"description": "Three menu items are unavailable", "query": "SELECT COUNT(*) FROM menu_items WHERE available=0", "equals": 3},
+    {"description": "Only oat latte, vanilla latte, and mocha are unavailable", "query": "SELECT GROUP_CONCAT(name, '|') FROM (SELECT name FROM menu_items WHERE available=0 ORDER BY name)", "equals": "Mocha|Oat Milk Latte|Vanilla Latte"},
+    {"description": "No purchase orders were created", "query": "SELECT COUNT(*) FROM purchase_orders", "equals": 0}
+  ],
+  "max_steps": 40
+}

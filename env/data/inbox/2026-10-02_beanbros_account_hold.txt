@@ -1,0 +1,6 @@
+From: accounts@beanbros.example
+To: orders@brewandco.example
+Subject: Account on hold
+
+Your account is on hold until invoice INV-2291 (Rs 18,400) is paid.
+We cannot accept new orders until it clears.

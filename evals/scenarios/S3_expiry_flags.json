@@ -1,0 +1,12 @@
+{
+  "id": "S3_expiry_flags",
+  "task": "Flag anything expiring in the next 2 days and tell me.",
+  "env": {"APP_TODAY": "2026-10-05", "chaos": {}, "extra_files": []},
+  "assertions": [
+    {"description": "Exactly the two qualifying items are flagged", "query": "SELECT GROUP_CONCAT(name, '|') FROM (SELECT name FROM inventory_items WHERE flagged=1 ORDER BY name)", "equals": "Blueberry muffin|Butter croissant"},
+    {"description": "Both flags use the required note", "query": "SELECT COUNT(*) FROM inventory_items WHERE flagged=1 AND flag_note='Expiring soon - use or discount'", "equals": 2},
+    {"description": "Whole milk outside the two-day boundary is not flagged", "query": "SELECT flagged FROM inventory_items WHERE name='Whole milk'", "equals": 0},
+    {"description": "No purchase orders were created", "query": "SELECT COUNT(*) FROM purchase_orders", "equals": 0}
+  ],
+  "max_steps": 40
+}

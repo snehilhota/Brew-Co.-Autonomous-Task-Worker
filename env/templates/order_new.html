@@ -1,17 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}New Purchase Order | Brew &amp; Co.{% endblock %}
+{% block title %}{% if draft_id %}Edit Draft{% else %}New Purchase Order{% endif %} | Brew &amp; Co.{% endblock %}
 
 {% block content %}
-    <h2>New purchase order</h2>
+    <h2>{% if draft_id %}Edit draft purchase order {{ draft_id }}{% else %}New purchase order{% endif %}</h2>
 
-    <div id="form-errors" role="alert">
-        {% for error in errors %}
-            <p>{{ error }}</p>
-        {% endfor %}
-    </div>
+    {% if errors %}
+        <div id="form-errors" role="alert">
+            {% for error in errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-    <form id="purchase-order-form" method="post" action="/orders/new">
+    <form id="purchase-order-form" method="post" action="{{ url_for('new_order') }}">
+        {% if draft_id %}<input type="hidden" name="draft_id" value="{{ draft_id }}">{% endif %}
         <p>
             <label for="supplier-id">Supplier</label>
             <select id="supplier-id" name="supplier_id">
@@ -31,12 +34,11 @@
         </p>
 
         <p>
-            <label for="delivery-date">Delivery date (DD/MM/YYYY)</label>
+            <label for="delivery-date">Delivery date</label>
             <input
                 id="delivery-date"
                 name="delivery_date"
-                type="text"
-                placeholder="DD/MM/YYYY"
+                type="date"
                 value="{{ delivery_date_text }}"
             >
         </p>
@@ -105,7 +107,7 @@
             value="draft"
             data-risk="reversible"
             data-action="save_draft"
-        >Save draft</button>
+        >{% if draft_id %}Save changes{% else %}Save draft{% endif %}</button>
 
         <button
             id="submit-order"
@@ -115,7 +117,7 @@
             data-risk="irreversible"
             data-action="submit_po"
             data-amount="{{ order_total }}"
-        >Submit order</button>
+        >{% if draft_id %}Submit draft{% else %}Submit order{% endif %}</button>
     </form>
 
     <script>

@@ -1,0 +1,8 @@
+{
+  "name": "Local mock operations environment",
+  "base_url_env": "ENV_BASE_URL",
+  "allowed_url_prefix": "http://127.0.0.1:5000/",
+  "blocked_paths": ["/__"],
+  "file_root": "env/data",
+  "brief": "You are operating a small business back-office web application. Internal pages are available from the home navigation. Reference documents, policies, price lists, and messages are in the read-only file area. Learn the applicable rules from those files before making changes. The application labels every write with risk metadata and displays validation errors."
+}

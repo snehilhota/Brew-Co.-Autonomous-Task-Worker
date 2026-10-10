@@ -1,0 +1,8 @@
+{
+  "irreversible": {
+    "auto_allow_max_amount": 10000,
+    "hard_block_min_amount": 50000
+  },
+  "reversible": "allow_and_log",
+  "unannotated_write": "require_approval"
+}

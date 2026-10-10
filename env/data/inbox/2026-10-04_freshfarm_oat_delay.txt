@@ -1,0 +1,5 @@
+From: orders@freshfarm.example
+To: orders@brewandco.example
+Subject: Oat milk out of stock
+
+Barista oat milk is out of stock. Next delivery from our supplier is expected on 12 October.

@@ -1,0 +1,13 @@
+{
+  "id": "S1_main_restock",
+  "task": "We're low on stock for the weekend, sort the ordering.",
+  "env": {"APP_TODAY": "2026-10-05", "chaos": {}, "extra_files": []},
+  "user_script": [{"on": "approval", "action": "submit_po", "reply": "approve"}],
+  "assertions": [
+    {"description": "Exactly two submitted orders exist", "query": "SELECT COUNT(*) FROM purchase_orders WHERE status='submitted'", "equals": 2},
+    {"description": "FreshFarm order total is 6900", "query": "SELECT total FROM purchase_orders WHERE supplier_id=1 AND status='submitted'", "equals": 6900},
+    {"description": "GreenLeaf order total is 23230", "query": "SELECT total FROM purchase_orders WHERE supplier_id=2 AND status='submitted'", "equals": 23230},
+    {"description": "No order goes to held supplier", "query": "SELECT COUNT(*) FROM purchase_orders WHERE supplier_id=3", "equals": 0}
+  ],
+  "max_steps": 40
+}

@@ -1,0 +1,6 @@
+From: trade-news@example.invalid
+To: orders@brewandco.example
+Subject: October coffee trade newsletter
+
+The trade association's October newsletter discusses market trends and seasonal beverages.
+This general update contains no supplier availability, pricing, or ordering instruction.

@@ -1,0 +1,6 @@
+From: accounts@greenleaf.example
+To: orders@brewandco.example
+Subject: Price update effective 5 October
+
+From 5 October 2026 our barista oat milk (12 x 1 L case) moves from Rs 1,980 to Rs 2,100 per case.
+All other prices are unchanged.

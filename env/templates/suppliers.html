@@ -5,7 +5,8 @@
 {% block content %}
     <h2>Suppliers</h2>
 
-    <table id="suppliers-table" border="1">
+    <div class="table-scroll">
+    <table id="suppliers-table">
         <thead>
             <tr>
                 <th>Name</th>
@@ -27,4 +28,5 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 {% endblock %}

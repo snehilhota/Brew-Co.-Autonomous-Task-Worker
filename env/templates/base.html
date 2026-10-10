@@ -5,25 +5,41 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Brew &amp; Co. Back Office{% endblock %}</title>
+    <meta name="theme-color" content="#173c32">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body>
-    <header>
-        <h1>Brew &amp; Co. Back Office</h1>
-        <p>Today: {{ today_label }}</p>
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="/" aria-label="Brew and Co. home">
+                <span class="brand-mark" aria-hidden="true">B</span>
+                <span class="brand-copy">
+                    <strong>Brew &amp; Co.</strong>
+                    <span>Back office</span>
+                </span>
+            </a>
 
-        <nav aria-label="Main navigation">
-            <a id="nav-home" href="/" data-risk="none" data-action="navigate_home">Home</a>
-            <a id="nav-inventory" href="/inventory" data-risk="none" data-action="navigate_inventory">Inventory</a>
-            <a id="nav-suppliers" href="/suppliers" data-risk="none" data-action="navigate_suppliers">Suppliers</a>
-            <a id="nav-orders" href="/orders" data-risk="none" data-action="navigate_orders">Orders</a>
-            <a id="nav-menu" href="/menu" data-risk="none" data-action="navigate_menu">Menu</a>
-        </nav>
+            <nav class="main-nav" aria-label="Main navigation">
+                <a id="nav-home" href="/" data-risk="none" data-action="navigate_home" {% if request.endpoint == 'home' %}aria-current="page"{% endif %}>Overview</a>
+                <a id="nav-inventory" href="/inventory" data-risk="none" data-action="navigate_inventory" {% if request.endpoint == 'inventory' %}aria-current="page"{% endif %}>Inventory</a>
+                <a id="nav-suppliers" href="/suppliers" data-risk="none" data-action="navigate_suppliers" {% if request.endpoint == 'suppliers' %}aria-current="page"{% endif %}>Suppliers</a>
+                <a id="nav-orders" href="/orders" data-risk="none" data-action="navigate_orders" {% if request.endpoint in ['orders', 'new_order', 'order_detail'] %}aria-current="page"{% endif %}>Orders</a>
+                <a id="nav-menu" href="/menu" data-risk="none" data-action="navigate_menu" {% if request.endpoint == 'menu' %}aria-current="page"{% endif %}>Menu</a>
+                <a id="nav-agent" href="/agent" data-risk="none" data-action="navigate_agent" {% if request.endpoint in ['agent_activity', 'agent_run_detail'] %}aria-current="page"{% endif %}>Agent activity</a>
+            </nav>
+
+            <div class="header-date">
+                <span class="date-dot" aria-hidden="true"></span>
+                <span>{{ today_label }}</span>
+            </div>
+        </div>
     </header>
 
-    <main>
+    <main class="page-shell">
         {% block content %}{% endblock %}
     </main>
+    <footer class="site-footer">Brew &amp; Co. <span>·</span> Daily operations, made simpler.</footer>
 </body>
 
 </html>

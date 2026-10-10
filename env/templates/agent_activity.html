@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Agent Activity | Brew &amp; Co.{% endblock %}
+
+{% block content %}
+<section class="page-intro">
+    <p class="eyebrow">AUTONOMOUS OPERATIONS</p>
+    <h1>Agent activity</h1>
+    <p>Recorded runs from the task worker. Each run keeps its own trace, outcome, and verification status.</p>
+</section>
+
+<section class="agent-process-strip" aria-label="Agent process">
+    <div><span>01</span><strong>Understand</strong><small>Task and policy</small></div>
+    <span class="cycle-arrow" aria-hidden="true">→</span>
+    <div><span>02</span><strong>Inspect</strong><small>Browser and files</small></div>
+    <span class="cycle-arrow" aria-hidden="true">→</span>
+    <div><span>03</span><strong>Act</strong><small>Risk-gated tools</small></div>
+    <span class="cycle-arrow" aria-hidden="true">→</span>
+    <div><span>04</span><strong>Verify</strong><small>Read-only evidence check</small></div>
+</section>
+
+<div class="runs-heading">
+    <div><p class="eyebrow">LOCAL TRACE LOG</p><h2>Task run history</h2></div>
+    <span class="run-count">{{ runs|length }} recorded {{ "run" if runs|length == 1 else "runs" }}</span>
+</div>
+
+{% if runs %}
+    <section class="run-history" aria-label="Recorded agent runs">
+        {% for run in runs %}
+            <a class="run-card" href="{{ url_for('agent_run_detail', run_id=run['run_id']) }}">
+                <div class="run-card-top">
+                    <span class="run-status status-{{ run['status']|lower }}">{{ run["status"]|replace("_", " ")|title }}</span>
+                    <span class="run-scenario">{{ run["scenario_id"] or "Manual task" }}</span>
+                    <span class="run-time">{{ run["started_at"]|replace("T", " ")|replace("+00:00", " UTC") }}</span>
+                </div>
+                <h3>{{ run["goal"] }}</h3>
+                <p class="run-summary">{{ run["summary"] }}</p>
+                <div class="run-metrics">
+                    <span><strong>{{ run["steps"] }}</strong> model steps</span>
+                    <span><strong>{{ run["tool_calls"] }}</strong> tool actions</span>
+                    {% if run["api_requests"] is not none %}<span><strong>{{ run["api_requests"] }}</strong> API requests</span>{% endif %}
+                    <span><strong>{{ run["wall_seconds"] }}</strong> seconds</span>
+                    <span class="verification-state {% if run['verification_ok'] %}verified{% else %}unverified{% endif %}">{% if run["verification_ok"] %}✓ Verified{% else %}Not verified{% endif %}</span>
+                </div>
+                <span class="run-card-arrow" aria-hidden="true">↗</span>
+            </a>
+        {% endfor %}
+    </section>
+{% else %}
+    <section class="empty-agent-state">
+        <span class="empty-run-mark" aria-hidden="true">↗</span>
+        <h3>No agent runs recorded yet</h3>
+        <p>Start a task from the project CLI. Its trace and verification outcome will appear here when the run finishes.</p>
+    </section>
+{% endif %}
+{% endblock %}

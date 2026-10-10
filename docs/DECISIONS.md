@@ -17,4 +17,17 @@ Initial decisions transcribed from the project handoff on 6 October 2026. These 
 | Verification | Agent-side read-only verifier plus separate evaluation oracle | The agent never gets direct database access. |
 | Safety and reliability | Code-enforced approval gate and unknown-outcome write guard | A model response alone must not authorize risky writes or blind retries. |
 
-The initial stack is deliberately replaceable at the adapter boundary. Before the first API call, confirm the selected model and available quota in the account's AI Studio project.
+The initial stack is deliberately replaceable at the adapter boundary. The existing successful `llm_hello.py` call confirmed the configured Gemini key. The agent adapter uses Google's documented `generateContent` function-calling endpoint over the already-installed `httpx` client, so its request/response format can be tested without adding another provider SDK. The configured `AGENT_MODEL` and `VERIFIER_MODEL` remain independently changeable.
+
+## Implementation status (8 Oct 2026)
+
+- M0 environment, repository, smoke test, pytest setup, Gemini hello call, and decisions: completed by the builder.
+- M1 mock app, schema, seed data, and pages: implemented and manually checked.
+- M2 PO validation, form, risk annotations, and failure switches: implemented; validation and commit-boundary behavior are covered by tests.
+- M3 generic tools and executor: implemented; an isolated browser-to-Flask purchase-order flow passed.
+- M4 Gemini adapter: implemented and response parsing is tested with a mocked API response; a live tool-call request still needs one quota-approved run.
+- M5 loop, working memory, budgets, and trace: deterministic scripted loop and verifier path pass; live S1 is not yet measured.
+- M6 gate, approvals, and unknown-outcome guard: implemented and covered by deterministic tests; the timeout-after-commit scenario has not yet been run through Gemini.
+- M7 verifier: read-only behavior and loop plumbing are tested with a scripted client; a live independent model verification remains to be demonstrated.
+- M8 oracle and S1-S3 scenario definitions: implemented. Automated multi-run scenario orchestration and P1 chaos/ablation metrics remain.
+- M10 README and architecture/limitations/demo guidance: prepared. A recorded video and clean-clone run still need to be completed before submission.
